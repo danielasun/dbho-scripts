@@ -1,0 +1,63 @@
+<BehaviorTree>
+  	<Variables>
+   		<Variable name="Alerted"/>
+   		<Variable name="AwareOfPlayer"/>
+   		<Variable name="IsAttackRange"/>
+   		<Variable name="ExecuteSequence" />
+		<Variable name="ExecuteInterruptibleSequence" />
+		<Variable name="InGroup" />
+  	</Variables>
+
+  	<SignalVariables>
+   		<Signal name="OnEnemySeen" variable="AwareOfPlayer" value="true"/>
+		<Signal name="OnEnemySeen" variable="Alerted" value="true"/>
+		<Signal name="OnLostSightOfTarget" variable="AwareOfPlayer" value="false"/>
+<!-- 		<Signal name="OnCloseContact" variable="IsAttackRange" value="true"/>
+		<Signal name="OnCloseContact" variable="Alerted" value="true"/>
+		<Signal name="OnCloseContact" variable="AwareOfPlayer" value="true"/> -->
+		<Signal name="OnThreateningSoundHeard" variable="Alerted" value="true"/>
+		<Signal name="OnReceivingDamage" variable="Alerted" value="true"/>
+		<Signal name="OnEnterCloseRange" variable="InGroup" value="true"/>
+		<Signal name="OnLeaveCloseRange" variable="InGroup" value="false"/>
+
+	</SignalVariables>
+  
+	<Root>
+		<Sequence>
+			<Priority>
+				<Case condition="InGroup" >
+					<Sequence>
+						<Bubble message="InGroup attacking" duration="2" />
+						<LuaBehavior name="GroupApproach" />
+					</Sequence>
+				</Case>				
+				<Case condition="IsAttackRange" >
+					<Sequence>
+						<Bubble message="I'm attacking" duration="2" />
+						<LuaBehavior name="SwordsmanAttack" />
+					</Sequence>
+				</Case>
+				<Case condition="AwareOfPlayer">
+					<Sequence>
+						<Bubble message="I am approaching" duration="2"/>
+						<LuaBehavior name="SwordsmanApproach" />
+					</Sequence>
+				</Case>
+				<Case condition="Alerted">
+					<Sequence>
+						<Bubble message="I am seeking" duration="2"/>
+						<LuaBehavior name="SwordsmanSeek" />
+					</Sequence>
+				</Case>
+				<Case>
+					<Sequence>
+						<Bubble message="I am wandering" duration="2"/>
+						<LuaBehavior name="SwordsmanIdle" />
+					</Sequence>
+				</Case>
+
+			</Priority>
+		</Sequence>
+	</Root>
+</BehaviorTree>
+

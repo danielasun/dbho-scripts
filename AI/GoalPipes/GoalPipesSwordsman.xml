@@ -1,0 +1,34 @@
+<GoalPipes>
+   <GoalPipe name="swordsman_idle">
+      <Locate name="player"/>
+   </GoalPipe>
+   <!-- <GoalPipe name="walker_idle">
+      <Locate name="player"/>
+   </GoalPipe> -->
+   <GoalPipe name="swordsman_seek">
+      <Locate name="player" blocking="false"/>
+      <Script code="entity.Behavior:AnalyzeSituation(entity);"/>
+   </GoalPipe>
+   <GoalPipe name="swordsman_approach">
+      <Locate name="player" blocking="false"/>
+      <AcqTarget name="player" blocking="false"/>
+      <Speed id="Walk" blocking="true"/>
+      <Stick blocking="true" distance="2.3" AlignBeforeMove="true" UseLastOp="true" LookAtLastOp="true"/>
+      <Script code="entity.Behavior:AnalyzeSituation(entity);"/>
+   </GoalPipe>
+   <GoalPipe name="swordsman_attack">
+      <Locate name="player" blocking="false"/>
+      <AcqTarget name="player" blocking="false"/>
+      <FireCmd mode="MeleeForced" useLastOp="true" timeout="1.5" blocking="true"/>
+      <FireCmd mode="Off" blocking="false"/>
+      <Approach time="0.25" UseLastOp="true" LookAtLastOp="true" blocking="true"/>
+    <Script code="entity.Behavior:AnalyzeSituation(entity);"/>
+   </GoalPipe>
+   <GoalPipe name="group_approach">
+      <Locate name="player" blocking="false"/>
+      <AcqTarget name="player" blocking="false"/>
+      <Speed id="Run" blocking="true"/>
+      <Stick blocking="true" distance="2.3" AlignBeforeMove="true" UseLastOp="true" LookAtLastOp="true"/>
+      <Script code="entity.Behavior:AnalyzeSituation(entity);"/>
+   </GoalPipe>
+</GoalPipes>

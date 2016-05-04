@@ -1,0 +1,35 @@
+<BehaviorTree>
+	<Root>
+		<StateMachine>
+			<State name="FindTarget">
+				<Log message="Looking for target"/>
+				<Transitions>
+					<Transition to="FollowTarget" onEvent="OnNewAttentionTarget"/>
+				</Transitions>
+				<BehaviorTree>
+						<Wait duration="9999"/>
+				</BehaviorTree>
+			</State>
+
+			<State name="FollowTarget">
+				<Log message="Following Target"/>
+			
+			<BehaviorTree>
+					<Loop>
+						<SuppressFailure>
+							<Sequence>
+								<Move to="Target" stance="Alerted" speed="Walk" bodyOrientation="FullyTowardsMovementDirection" glanceInMovementDirection="true" 
+											stopWithinDistance="2"/>
+								
+								<Melee target="AttentionTarget" cylinderRadius="1.5"/>
+								
+							</Sequence>
+						</SuppressFailure>
+					</Loop>
+			 
+			</BehaviorTree>
+				</State>
+		</StateMachine>
+	 </Root>
+	
+</BehaviorTree>

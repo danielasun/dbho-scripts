@@ -1,0 +1,31 @@
+<BehaviorTree>
+   <Root>
+      <StateMachine>  
+         <State name="BlissfulZombie">
+            <Transitions>
+               <Transition onEvent="OnEnemySeen" to="EnRagedZombie" />
+            </Transitions>
+            <BehaviorTree>
+               <LuaBehavior name="ZombieIdle"/>
+            </BehaviorTree>
+         </State>
+         
+         
+         <State name="EnRagedZombie">
+         <BehaviorTree>
+         <Loop count="99999">
+            <Sequence>
+               <Aim at="Target" durationOnceWithinThreshold="0.25"/>
+               <ExecuteLua code="entity:SelectPrimaryWeapon()"/>
+               <Animate name="AI_NoticeVisualThreatAndTurn" setBodyDirectionTowardsAttentionTarget="1" />
+               <Move to="Target" speed="Run" stance="Alerted" avoidDangers="0" stopWithinDistance="1.8" avoidGroupMates="1" _failureLog="I cannot move towards the target. Something went wrong."/>
+               <Shoot at="Target" fireMode="MeleeForced" stance="Stand" duration="0.3"/>
+            </Sequence>
+         </Loop>
+         </BehaviorTree>
+         </State>
+         
+         
+      </StateMachine>
+   </Root>
+</BehaviorTree>

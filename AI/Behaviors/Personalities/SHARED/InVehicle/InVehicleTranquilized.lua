@@ -1,0 +1,24 @@
+----------------------------------------------------------------------------------------------------
+--
+-- All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+-- its licensors.
+--
+-- For complete copyright and license terms please see the LICENSE at the root of this
+-- distribution (the "License"). All use of this software is governed by the License,
+-- or, if provided, by the license below or the license accompanying this file. Do not
+-- remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--
+-- Original file Copyright Crytek GMBH or its affiliates, used under license.
+--
+----------------------------------------------------------------------------------------------------
+local Behavior = CreateAIBehavior("InVehicleTranquilized", "Dumb",
+{		Exclusive = 1,
+	
+	Constructor = function(self,entity,data)
+		AI.ModifySmartObjectStates(entity.id,"Busy");		entity:InsertSubpipe( AIGOALPIPE_HIGHPRIORITY, "cv_tranquilized", nil, -190 );		entity:TriggerEvent(AIEVENT_SLEEP);		AI.SetIgnorant(entity.id,1);
+	end,
+	
+	Destructor = function(self,entity)
+		AI.ModifySmartObjectStates(entity.id,"-Busy");		entity:CancelSubpipe( -190 );		AI.SetIgnorant(entity.id,0);
+	end,		---------------------------------------------	-- being waken up from fall & play--	FALL_AND_PLAY_WAKEUP	= function(self, entity, sender, data)--		entity:SelectPipe(0,"cv_tranquilized_wakeup");--	end,	---------------------------------------------	OnSeenByEnemy = function( self, entity, sender )	end,	---------------------------------------------	OnQueryUseObject = function ( self, entity, sender, extraData )	end,	---------------------------------------------	OnEnemySeen = function( self, entity, fDistance )	end,	---------------------------------------------	OnTargetDead = function( self, entity )	end,		--------------------------------------------------	OnBulletHit = function( self, entity, sender,data )	end,	---------------------------------------------	OnSomethingSeen = function( self, entity )	end,	---------------------------------------------	OnThreateningSeen = function( self, entity )	end,	--------------------------------------------------	OnNoHidingPlace = function( self, entity, sender,data )	end,		---------------------------------------------	OnBackOffFailed = function(self,entity,sender)	end,	---------------------------------------------	GET_ALERTED = function( self, entity )	end,	---------------------------------------------	DRAW_GUN = function( self, entity )	end,	---------------------------------------------	OnEnemyMemory = function( self, entity )		-- called when the enemy can no longer see its foe, but remembers where it saw it last	end,	---------------------------------------------	OnInterestingSoundHeard = function( self, entity )	end,	---------------------------------------------	OnThreateningSoundHeard = function( self, entity, fDistance )	end,	--------------------------------------------------	OnCoverRequested = function ( self, entity, sender)		-- called when the enemy is damaged	end,	---------------------------------------------	OnDamage = function ( self, entity, sender)	end,	---------------------------------------------	OnEnemyDamage = function ( self, entity, sender,data)	end,	---------------------------------------------	OnReload = function( self, entity )	end,	--------------------------------------------------	OnBulletRain = function ( self, entity, sender,data)	end,	--------------------------------------------------	OnObjectSeen = function( self, entity, fDistance, signalData )	end,	---------------------------------------------	OnCloseContact = function(self,entity,sender)	end,	---------------------------------------------	OnPathFound = function(self,entity,sender)	end,	---------------------------------------------	OnNoTarget = function(self,entity,sender)	end,	--------------------------------------------------	-- CUSTOM SIGNALS	--------------------------------------------------	--------------------------------------------------	OnSomebodyDied = function( self, entity, sender)	end,	--------------------------------------------------	OnGroupMemberDiedNearest = function ( self, entity, sender,data)	end,	--------------------------------------------------	INVESTIGATE_TARGET = function (self, entity, sender)	end,	---------------------------------------------	-- GROUP SIGNALS	--------------------------------------------------	HEADS_UP_GUYS = function (self, entity, sender)	end,	---------------------------------------------	INCOMING_FIRE = function (self, entity, sender)	end,	---------------------------------------------	OnHideSpotReached = function ( self, entity, sender,data)	end,	-------------------------------------------------})
