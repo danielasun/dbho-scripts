@@ -12,10 +12,11 @@
 		<Reaction faction="Players" reaction="hostile" />
 		<Reaction faction="Civilians" reaction="neutral" />
 		<Reaction faction="Assassins" reaction="hostile" />
+        <Reaction faction="Medics" reaction="hostile" />
 	</Faction>
 	
 	<Faction name="Assassins">
-		<Reaction faction="Players" reaction="hostile" />
+		<Reaction faction="Players" reaction="friendly" />
 		<Reaction faction="Civilians" reaction="hostile" />
 		<Reaction faction="Grunts" reaction="hostile" />
 	</Faction>
@@ -23,4 +24,9 @@
 	<Faction name="HostileOnlyWithPlayers" default="neutral">
 		<Reaction faction="Players" reaction="hostile" />
 	</Faction>
+
+    <Faction name="Medics" default="neutral">
+        <Reaction faction="Players" reaction="hostile" />
+        <Reaction faction="Grunts" reaction="hostile" />
+    </Faction>
 </Factions>

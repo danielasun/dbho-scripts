@@ -8,6 +8,7 @@
         <Variable name="SeesPlayer"/>
         <Variable name="IsHurt" />
         <Variable name="FriendIsNear" />
+        <Variable name="HasTarget" />
 
         <!-- these variables are not used in this BT, but need to be present to prevent a warning caused by BasicAI:OnReset() -->
         <Variable name="ExecuteSequence" />
@@ -32,18 +33,21 @@
             -->
             <State name="Wander">
                 <Transitions>
-                    <Transition to="Combat" onEvent="OnNewAttentionTarget"/>
+                    <Transition to="Chase" onEvent="OnNewAttentionTarget"/>
                 </Transitions>
                 <BehaviorTree>
-                    <Sequence>
-                        <Bubble message="I'm zombie-wander-idling" balloon="true" duration="10" />
-                        <Signal name="OnNoTarget" />
-                        <Bubble message="Hey, I'm a walkstar" balloon="true" duration="10" />
-                        <SetAlertness value="0"/>
-                        <Stance name="Relaxed"/>
-                        <Animate name="ZZ_AI_idleBreak"/>
-                        <Halt/>
-                    </Sequence>
+                    <Loop>
+                        <Sequence>
+                            <Bubble message="I'm zombie-wander-idling" balloon="true" duration="10" />
+                            <!-- <Signal name="OnNoTarget" filter="-1" /> -->
+                            <ExecuteLua code="entity:ZombieWander()" />
+                            <!-- <Bubble message="Hey, I'm a walkstar" balloon="true" duration="10" /> -->
+                            <SetAlertness value="0"/>
+                            <Stance name="Relaxed"/>
+                            <!-- <Animate name="ZZ_AI_idleBreak"/> -->
+                            <Wait duration="5"/>
+                        </Sequence>
+                    </Loop>
                 </BehaviorTree>
             </State>
             <!--
@@ -51,12 +55,14 @@
                     Combat
             =================================================
             -->
-            <State name="Combat">
+            <State name="Chase">
                 <Transitions>
                     <Transition to="Wander" onEvent="GoTo_Wander"/>
+                    <Transition to="CloseCombat" onEvent="OnCloseContact"/>
                 </Transitions>
                 <BehaviorTree>
                     <Sequence>
+
                         <Bubble message="COMBAT MODE" duration="5.0" balloon="true" log="true" />
                         <Log message="Now I should fight you!"/>
                         <SetAlertness value="2"/>
@@ -66,17 +72,34 @@
                         <!-- main combat loop -->
                         <Loop _startLog="main combat loop">
                             <Sequence>
-                                <SuppressFailure>
-                                    <Move to="Target" speed="Run" stance="Stand" avoidDangers="0" stopWithinDistance="10"/>
-                                </SuppressFailure>
-                                <!-- <Shoot at="Target" fireMode="Burst" stance="Stand" duration="2.0" _startLog="starting to shoot"/> -->
-                                <!-- keep fighting or transition back to "Idle" -->
                                 <Selector>
                                     <AssertCondition condition="HasTarget"/>
-                                    <SendTransitionSignal name="GoTo_Wander"/>
+                                        <SendTransitionSignal name="GoTo_Wander"/>
                                 </Selector>
+                                <SuppressFailure>
+                                    <Move to="Target" speed="Sprint" stance="Stand" avoidDangers="1" stopWithinDistance="1"/>
+                                </SuppressFailure>
+                                <!-- <Shoot at="Target" fireMode="Melee" stance="Stand" duration="1.0" _startLog="starting to shoot"/> -->
+                                <Melee target="AttentionTarget" cylinderRadius="3" hitType="CGameRules::EHitType::Melee" materialEffect="materialEffectName" />
                             </Sequence>
                         </Loop>
+                    </Sequence>
+                </BehaviorTree>
+            </State>
+
+            <State name="CloseCombat">
+                <Transitions>
+                    <Transition to="Chase" onEvent="GoTo_Combat"/>
+                </Transitions>
+                <BehaviorTree>
+                    <Sequence>
+                        <Bubble message="CloseCombat" duration="5.0" balloon="true" log="true" />
+                        <Log message="Now I should fight you!"/>
+                        <SetAlertness value="2"/>
+                        <Stance name="Alerted"/>
+                        <ExecuteLua code="entity:SelectPrimaryWeapon()"/>
+                        <Shoot at="Target" fireMode="MeleeForced" stance="Stand" duration="1.0" _startLog="HITTING"/>
+                        <SendTransitionSignal name="GoTo_Combat" />
                     </Sequence>
                 </BehaviorTree>
             </State>

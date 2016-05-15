@@ -15,14 +15,38 @@
 Script.ReloadScript( "SCRIPTS/Entities/AI/Characters/Human_x.lua")
 Script.ReloadScript( "SCRIPTS/Entities/actor/BasicActor.lua")
 Script.ReloadScript( "SCRIPTS/Entities/AI/Shared/BasicAI.lua")
-CreateActor(Human_x)
-Human=CreateAI(Human_x)
+
+Medic_x = {
+  Properties = {
+    bAdditionalBool = false,
+  }
+}
+
+function Medic_x:OnEnemySeen()
+  AIBase.OnEnemySeen(self);
+  
+  local attentionTarget = AI.GetAttentionTargetEntity(self.id);
+  
+  if (attentionTarget.Properties.esFaction == "Players" and attentionTarget.actor:GetHealth() < 800) then
+    AI.Signal(SIGNALFILTER_SENDER, 1, "OnInjuredPlayerSeen", self.id);
+  end
+end
+
+function Medic_x:HealPlayer()
+  local attentionTarget = AI.GetAttentionTargetEntity(self.id);
+  attentionTarget.actor:SetHealth(1000);  
+end
+
+mergef(Medic_x,Human_x,1)
+
+CreateActor(Medic_x)
+Medic=CreateAI(Medic_x)
 
 Script.ReloadScript( "SCRIPTS/AI/Assignments.lua")
-InjectAssignmentFunctionality(Human)
-AddDefendAreaAssignment(Human)
-AddHoldPositionAssignment(Human)
-AddCombatMoveAssignment(Human)
-AddPsychoCombatAllowedAssignment(Human)
+InjectAssignmentFunctionality(Medic)
+AddDefendAreaAssignment(Medic)
+AddHoldPositionAssignment(Medic)
+AddCombatMoveAssignment(Medic)
+AddPsychoCombatAllowedAssignment(Medic)
 
-Human:Expose()
+Medic:Expose()

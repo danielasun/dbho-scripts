@@ -1,0 +1,109 @@
+<BehaviorTree>
+	<Variables>
+		<Variable name="HasTarget"/>
+
+		<!-- these variables are not used in this BT, but need to be present to prevent a warning caused by BasicAI:OnReset() -->
+		<Variable name="ExecuteSequence" />
+		<Variable name="ExecuteInterruptibleSequence" />
+	</Variables>
+
+	<SignalVariables>
+		<Signal name="OnInjuredPlayerSeen" variable="HasTarget" value="true"/>
+		<Signal name="OnNoTarget" variable="HasTarget" value="false"/>
+		<Signal name="OnLostSightOfTarget" variable="HasTarget" value="false" />
+	</SignalVariables>
+
+	<Timestamps>
+	</Timestamps>
+
+	<Root>
+
+		<StateMachine>
+
+			<!--
+			=================================================
+					Idle
+			=================================================
+			-->
+
+			<State name="Idle">
+
+				<Transitions>
+					<Transition to="Help" onEvent="OnInjuredPlayerSeen"/>
+				</Transitions>
+
+				<BehaviorTree>
+
+					<Sequence>
+
+						<SetAlertness value="0"/>
+
+						<ExecuteLua code="entity.actor:HolsterItem(true)"/>
+
+						<Stance name="Relaxed"/>
+
+						<Animate name="ZZ_AI_idleBreak"/>
+
+						<Halt/>
+
+					</Sequence>
+
+				</BehaviorTree>
+
+			</State>
+
+			<!--
+			=================================================
+					Help
+			=================================================
+			-->
+
+			<State name="Help">
+
+				<Transitions>
+					<Transition to="Idle" onEvent="GoTo_Idle"/>
+				</Transitions>
+
+				<BehaviorTree>
+
+					<Sequence>
+          
+            <Bubble message="You are injured! Hold still!" duration="5.0" balloon="true" log="true" />
+
+						<SetAlertness value="2"/>
+
+						<Stance name="Alerted"/>
+
+						<!-- main loop -->
+						<Loop _startLog="main loop">
+
+							<Sequence>
+
+								<Move to="Target" speed="Run" stance="Stand" avoidDangers="0" stopWithinDistance="2.5"/>
+
+                <ExecuteLua code="entity:HealPlayer()" />
+
+								<!-- keep helping or transition back to "Idle" -->
+								<Selector>
+
+									<AssertCondition condition="HasTarget"/>
+
+									<SendTransitionSignal name="GoTo_Idle"/>
+
+								</Selector>
+
+							</Sequence>
+
+						</Loop>
+
+					</Sequence>
+
+				</BehaviorTree>
+
+			</State>
+
+		</StateMachine>
+
+	</Root>
+
+</BehaviorTree>

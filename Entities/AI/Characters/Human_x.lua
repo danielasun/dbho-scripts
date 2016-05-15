@@ -435,13 +435,13 @@ Human_x =
 
 	melee =
 	{
-		damage = 400,
+		damage = 800,
 		damageOffset = {x=0, y=2, z=0};
-		damageRadius = 1.8,
+		damageRadius = 5,
 		damageRadiusShort = 1.5,
 		hitRange = 1.8,
 		knockdownChance = 0.1,
-		impulse = 600,
+		impulse = 10000,
 		angleThreshold = 180,
 	},
 
@@ -583,6 +583,8 @@ Human_x =
 	OnGroupMemberDiedOnHMG = function(entity)
 		AI.PlayCommunication(entity.id, "NoticeMateDiedOnMountedGun", "Group", 2.0)
 	end,
+
+
 }
 
 HumanPostures =
@@ -775,23 +777,23 @@ mergef(Human_x, AIBase, 1)
 -- DBHO added here
 function Human_x:OnEnemySeen()
 	Log("============")
-    Log("OnEnemySeen!")
+    Log("OnEnemySeen")
     Log("============")
-    Log(self.id)
-    AI.Signal(SIGNALFILTER_SENDER,1,"OnInjuredPlayerSeen",self.id)
+    -- AI.Signal(SIGNALFILTER_SENDER,1,"OnInjuredPlayerSeen",self.id) -- doesn't work
 end
 
 function Human_x:OnDamage(sender)
 	Log("============")
     Log("OnDamage!")
     Log("============")
-    Log(self.health)
+    Log(self.health) -- doesn't work
 end
 
 function Human_x:OnCloseContact()
 	Log("============")
     Log("OnCloseContact!")
     Log("============")
+
 end
 
 function Human_x:OnInjuredPlayerSeen()
@@ -800,6 +802,40 @@ function Human_x:OnInjuredPlayerSeen()
 	Log("==========")
 end
 
+function Human_x:OnNoTarget()
+	Log("==========")
+	Log("Zombie wander, dude")
+	Log("==========")
+end
+
+-- ZombieWander = function(self,entity)
+-- 	Log("Zombie wander, dude")
+-- end
+
+function Human_x:ZombieWander()
+	Log("function ZombieWander")
+
+	local pos = self:GetPos();
+	pos.x = pos.x + random(-10, 10)
+	pos.y = pos.y + random(-10, 10)
+
+	local data = {};
+	data.point = pos;
+	data.fValue = 0;   -- EndAccuracy
+	data.point2 = {};
+	data.point2.x = 0; -- StopDistance
+	data.iValue = BODYPOS_RELAXED; -- Stance
+
+	mymessage = "yoyoyo"
+	self:PrintMessage(mymessage)
+	AIBehavior.DEFAULT:ACT_GOTO(self, self, data);
+
+  -- AI.Signal(SIGNALFILTER_SENDER,1,"OnInjuredPlayerSeen",self.id)
+end
+
+function Human_x:PrintMessage(message)
+	Log(message)
+end
 -------------------------
 
 
@@ -1545,3 +1581,18 @@ Human_x.FlowEvents =
     TargetPos = "Vec3",
   },
 }
+
+GetNewDestination = function(self, entity)
+  local pos = entity:GetPos();
+  pos.x = pos.x + random(-10, 10);
+  pos.y = pos.y + random(-10, 10);
+  
+  local data = {};
+  data.point = pos;
+  data.fValue = 0;   -- EndAccuracy
+  data.point2 = {};
+  data.point2.x = 0; -- StopDistance
+  data.iValue = BODYPOS_RELAXED; -- Stance
+  
+  AIBehavior.DEFAULT:ACT_GOTO(entity, entity, data);
+end

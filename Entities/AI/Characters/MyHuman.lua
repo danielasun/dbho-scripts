@@ -15,14 +15,23 @@
 Script.ReloadScript( "SCRIPTS/Entities/AI/Characters/Human_x.lua")
 Script.ReloadScript( "SCRIPTS/Entities/actor/BasicActor.lua")
 Script.ReloadScript( "SCRIPTS/Entities/AI/Shared/BasicAI.lua")
-CreateActor(Human_x)
-Human=CreateAI(Human_x)
+
+MyHuman_x = {
+  Properties = {
+    bAdditionalBool = true,
+  }
+}
+
+mergef(MyHuman_x, Human_x, 1)
+
+CreateActor(MyHuman_x)
+MyHuman=CreateAI(MyHuman_x)
 
 Script.ReloadScript( "SCRIPTS/AI/Assignments.lua")
-InjectAssignmentFunctionality(Human)
-AddDefendAreaAssignment(Human)
-AddHoldPositionAssignment(Human)
-AddCombatMoveAssignment(Human)
-AddPsychoCombatAllowedAssignment(Human)
+InjectAssignmentFunctionality(MyHuman)
+AddDefendAreaAssignment(MyHuman)
+AddHoldPositionAssignment(MyHuman)
+AddCombatMoveAssignment(MyHuman)
+AddPsychoCombatAllowedAssignment(MyHuman)
 
-Human:Expose()
+MyHuman:Expose()

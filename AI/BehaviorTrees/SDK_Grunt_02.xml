@@ -42,6 +42,7 @@
 				</Transitions>
 				<BehaviorTree>
 					<Sequence>
+						<Bubble message="I'm idling" duration="10" />
 						<SetAlertness value="0"/>
 						<ExecuteLua code="entity.actor:HolsterItem(true)"/>
 						<Stance name="Relaxed"/>
