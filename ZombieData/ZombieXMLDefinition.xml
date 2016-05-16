@@ -1,0 +1,18 @@
+<Definition root="Data">
+
+    <Property name="version" type="string"/>
+
+    <Table name="test">
+        <Property name="a" type="string"/>
+        <Property name="b" type="int" optional="1"/>
+        <Property name="tablelen" type="int"/>
+        <Property name="maxsize" type="int" />
+        <Array name="c" type="string" elementName="Val"/>
+        <Array name="d" elementName="Value">
+           <Property name="da" type="float"/>
+           <Property name="db" type="Vec3"/>
+        </Array>
+        <Property name="e" type="int"/>
+    </Table>
+    
+</Definition>

@@ -662,6 +662,9 @@ end
 
 
 function BasicAI.OnDeath( entity )
+
+	Log("IDEED")
+
 	AI.SetSmartObjectState( entity.id, "Dead" );
 
 	-- notify spawner - so it counts down and updates

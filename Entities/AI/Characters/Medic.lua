@@ -37,6 +37,11 @@ function Medic_x:HealPlayer()
   attentionTarget.actor:SetHealth(1000);  
 end
 
+function Medic_x:IdlingSignalFromMedic()
+    Log("IdlingSignalFromMedic")
+end
+
+
 mergef(Medic_x,Human_x,1)
 
 CreateActor(Medic_x)

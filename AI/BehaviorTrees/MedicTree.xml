@@ -39,7 +39,7 @@
 						<SetAlertness value="0"/>
 
 						<ExecuteLua code="entity.actor:HolsterItem(true)"/>
-
+						<Signal name="IdlingSignalFromMedic" />
 						<Stance name="Relaxed"/>
 
 						<Animate name="ZZ_AI_idleBreak"/>

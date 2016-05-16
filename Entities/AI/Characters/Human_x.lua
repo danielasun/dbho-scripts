@@ -441,7 +441,7 @@ Human_x =
 		damageRadiusShort = 1.5,
 		hitRange = 1.8,
 		knockdownChance = 0.1,
-		impulse = 10000,
+		impulse = 500,
 		angleThreshold = 180,
 	},
 
@@ -782,17 +782,19 @@ function Human_x:OnEnemySeen()
     -- AI.Signal(SIGNALFILTER_SENDER,1,"OnInjuredPlayerSeen",self.id) -- doesn't work
 end
 
-function Human_x:OnDamage(sender)
+function Human_x:OnDamage(sender, data)
 	Log("============")
     Log("OnDamage!")
     Log("============")
-    Log(self.health) -- doesn't work
+    Log(300)
+    Log(self.Properties.Damage.health) -- doesn't work
 end
 
 function Human_x:OnCloseContact()
 	Log("============")
     Log("OnCloseContact!")
     Log("============")
+    Log(self.Properties.Damage.health)
 
 end
 
@@ -826,8 +828,6 @@ function Human_x:ZombieWander()
 	data.point2.x = 0; -- StopDistance
 	data.iValue = BODYPOS_RELAXED; -- Stance
 
-	mymessage = "yoyoyo"
-	self:PrintMessage(mymessage)
 	AIBehavior.DEFAULT:ACT_GOTO(self, self, data);
 
   -- AI.Signal(SIGNALFILTER_SENDER,1,"OnInjuredPlayerSeen",self.id)
@@ -836,6 +836,28 @@ end
 function Human_x:PrintMessage(message)
 	Log(message)
 end
+
+function Human_x:SaveTable()
+	Log("Saving Table")
+	data = CryAction.LoadXML("C:\\Amazon\\Lumberyard\\1.1.0.0\\dev\\GameSDK\\Scripts\\ZombieData\\ZombieXMLDefinition.xml", "C:\\Amazon\\Lumberyard\\1.1.0.0\\dev\\GameSDK\\Scripts\\ZombieData\\ZombieXMLData.xml");
+
+	-- tmp = {
+	-- 		b="newstuff"
+	-- };
+	-- -- table.insert(data, tmp);
+	-- CryAction.SaveXML("C:\\Amazon\\Lumberyard\\1.1.0.0\\dev\\GameSDK\\Scripts\\ZombieData\\ZombieXMLDefinition.xml", "C:\\Amazon\\Lumberyard\\1.1.0.0\\dev\\GameSDK\\Scripts\\ZombieData\\ZombieXMLData.xml",tmp);
+
+	Log(data.test.a)
+	len = data.test.tablelen
+
+	data.test.a = "swag"
+	data.test.tablelen = len+1
+	data.test.d[data.test.tablelen] = {da=1000, db={x=1,y=2,z=3}}
+	CryAction.SaveXML("C:\\Amazon\\Lumberyard\\1.1.0.0\\dev\\GameSDK\\Scripts\\ZombieData\\ZombieXMLDefinition.xml", "C:\\Amazon\\Lumberyard\\1.1.0.0\\dev\\GameSDK\\Scripts\\ZombieData\\ZombieXMLData.xml",data);
+
+
+end
+
 -------------------------
 
 
@@ -1581,18 +1603,3 @@ Human_x.FlowEvents =
     TargetPos = "Vec3",
   },
 }
-
-GetNewDestination = function(self, entity)
-  local pos = entity:GetPos();
-  pos.x = pos.x + random(-10, 10);
-  pos.y = pos.y + random(-10, 10);
-  
-  local data = {};
-  data.point = pos;
-  data.fValue = 0;   -- EndAccuracy
-  data.point2 = {};
-  data.point2.x = 0; -- StopDistance
-  data.iValue = BODYPOS_RELAXED; -- Stance
-  
-  AIBehavior.DEFAULT:ACT_GOTO(entity, entity, data);
-end
