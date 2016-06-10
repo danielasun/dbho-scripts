@@ -1,5 +1,6 @@
 <Definition root="Data">
-    <Property name="version" type="float"/>
+    <Property name="generation" type="float"/>
+    <Property name="scenario" type="float" />
     <Array name="formation" elementName="pos">
         <Property name="x1" type="float"/>
         <Property name="y1" type="float"/>
@@ -19,8 +20,8 @@
         <Property name="x6" type="float"/>
         <Property name="y6" type="float"/>
         <Property name="theta6" type="float" />
-        <Property name="win" type="bool" />
         <Property name="blue_score" type="float" />
         <Property name="red_score" type="float" />
+        <Property name="fitness" type="float" />
     </Array>
 </Definition>

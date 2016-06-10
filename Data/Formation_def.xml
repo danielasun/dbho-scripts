@@ -1,8 +1,23 @@
 <Definition root="Data">
-    <Property name="version" type="string"/>
+    <Property name="generation" type="float"/>
     <Array name="formation" elementName="pos">
-        <Property name="x" type="float"/>
-        <Property name="y" type="float"/>
-        <Property name="theta" type="float" />
+        <Property name="x1" type="float"/>
+        <Property name="y1" type="float"/>
+        <Property name="theta1" type="float" />
+        <Property name="x2" type="float"/>
+        <Property name="y2" type="float"/>
+        <Property name="theta2" type="float" />
+        <Property name="x3" type="float"/>
+        <Property name="y3" type="float"/>
+        <Property name="theta3" type="float" />
+        <Property name="x4" type="float"/>
+        <Property name="y4" type="float"/>
+        <Property name="theta4" type="float" />
+        <Property name="x5" type="float"/>
+        <Property name="y5" type="float"/>
+        <Property name="theta5" type="float" />
+        <Property name="x6" type="float"/>
+        <Property name="y6" type="float"/>
+        <Property name="theta6" type="float" />
     </Array>
 </Definition>

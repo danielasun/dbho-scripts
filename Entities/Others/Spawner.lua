@@ -21,6 +21,8 @@ Spawner =
 
     redteam_formation = {}, 
     blueteam_formation = {},
+    generation_size = 10,
+    number_of_generations = 10,
 
     xmin = 473,
     xmax = 532,
@@ -59,18 +61,6 @@ function Spawner:SpawnPlayer(entityName, entityArchetype, pos, id_num)
     System.SpawnEntity(params)
 end 
 
--- function Spawner:SpawnFormationFromXML(entityName,entityArchetype)
--- -- spawns AI and adds them to the Blue team formation
---     Log("Spawner:SpawnFormationFromXML()")
---     local data = CryAction.LoadXML(self.xml_formation_def_path, self.xml_formation_data_path)
---     for i,playerPos in pairs(data.formation) do
---         Log("x,y,theta" .. playerPos.x .. "," .. playerPos.y .. "," .. playerPos.theta)
---         self.blueteam_formation[#self.blueteam_formation+1] = {x=playerPos.x,y=playerPos.y,theta=playerPos.theta}
---         Spawner:SpawnPlayer(entityName, entityArchetype, playerPos,i)
---     end
--- end
-
-
 function Spawner:OnInit()
     self:Activate(1) -- allows you to use OnUpdate
 end
@@ -81,18 +71,11 @@ function Spawner:EndGame(winningTeam,score)
     -- score is a table with {["bluescore"] = bluenum,["redscore"] = rednum}
     Log("Spawner:EndGame()")
     local data = CryAction.LoadXML(self.xml_def_path,self.xml_data_path)
-    local len = #data.formation;
-    if winningTeam == "blue" then
-        data.formation[len]["win"] = 1
-    else
-        data.formation[len]["win"] = 0
-    end
-    data.formation[len]["blue_score"] = score.bluescore;
-    data.formation[len]["red_score"] = score.redscore;
+    data.formation[data.scenario]["blue_score"] = score.bluescore
+    data.formation[data.scenario]["red_score"] = score.redscore
+    data.formation[data.scenario]["fitness"] = (score.bluescore + (6 - score.redscore))/12
     CryAction.SaveXML(self.xml_def_path, self.xml_data_path, data)
-
 end
-
 
 function Spawner:OnUpdate(dt)
     if(not System.IsEditing()) then
@@ -122,17 +105,97 @@ function Spawner:OnUpdate(dt)
         -- Log("Blue team has " .. GameToken.GetToken("GameStates.BlueNumAlive"))
         -- Log("Red team has " .. GameToken.GetToken("GameStates.RedNumAlive"))
     end
-    -- Log("Blue = " .. GameToken.GetToken("GameStates.BlueNumAlive"))
-
 end
 
 function Spawner:OnReset(bGameStart)
 
-    -- if(bGameStart) then
-    --     Log("Spawner:OnReset()")
-    --     self.redteam_formation = {}
-    --     self.blueteam_formation = {}
+    if(bGameStart) then
+        local LEARNINGOVER = 0
+        
+        Log("Spawner:OnReset()")
+        local data = CryAction.LoadXML(self.xml_def_path,self.xml_data_path)
 
+        -- every generation
+        if(data.scenario >= self.generation_size) then
+            data.generation = data.generation + 1
+            if data.generation <= self.number_of_generations then
+                data.scenario = 0 -- never ever finish with scenario = 0
+                for i = 1, self.generation_size do
+                    data.formation[i]["blue_score"] = -1;
+                    data.formation[i]["red_score"] = -1;
+                    data.formation[data.scenario]["fitness"] = -1
+                end
+                Log("GeneticAlgorithm()")
+            else
+                LEARNINGOVER = 1
+                Log("$5 MACHINE LEARNING OVER")
+            end
+        end
+
+        if LEARNINGOVER == 0 then
+            -- every scenario
+            data.scenario = data.scenario + 1
+            CryAction.SaveXML(self.xml_def_path, self.xml_data_path, data)
+            
+            -- clear out formations
+            self.redteam_formation = {}
+            self.blueteam_formation = {}
+
+            -- set the GameTokens
+            GameToken.SetToken("GameStates.GameIsRunning",true)
+            Log("GameRunning = " .. type(GameToken.GetToken("GameStates.GameIsRunning")))
+
+            if GameToken.GetToken("GameStates.GameIsRunning") == "1" then
+                Log("Game has started!")
+            end
+
+            GameToken.SetToken("GameStates.BlueNumAlive",self.Properties.iNumberOfPlayers)
+            Log("Blue team has " .. GameToken.GetToken("GameStates.BlueNumAlive"))
+            GameToken.SetToken("GameStates.RedNumAlive",self.Properties.iNumberOfPlayers)
+            Log("Red team has " .. GameToken.GetToken("GameStates.RedNumAlive"))
+
+            -- Red team
+            for i=1,self.Properties.iNumberOfPlayers do
+                local playerPos = Spawner:GenerateLocation(501,521,523,563)
+                self.redteam_formation["x" .. i] = playerPos.x
+                self.redteam_formation["y" .. i] = playerPos.y
+                self.redteam_formation["theta" .. i] = playerPos.theta
+                Spawner:SpawnPlayer("grunts.Human-red", "humans.grunts.Human-red", playerPos,i)
+            end
+
+            for k,val in pairs(self.redteam_formation) do
+                    Log(k .. " = " .. val)
+            end
+
+            -- Blue team
+            for i=1,self.Properties.iNumberOfPlayers do
+                
+                playerPos = {
+                    x=data.formation[data.scenario]["x"..i],
+                    y=data.formation[data.scenario]["y"..i],
+                    theta=data.formation[data.scenario]["theta"..i],
+                }
+
+                self.blueteam_formation["x" .. i] = playerPos.x
+                self.blueteam_formation["y" .. i] = playerPos.y
+                self.blueteam_formation["theta" .. i] = playerPos.theta
+                Spawner:SpawnPlayer("grunts.Human-blue","humans.grunts.Human-blue", playerPos,i)
+            end
+
+            Log("Number of entries in blueteam_formation is = " .. #self.blueteam_formation)
+            for k,val in pairs(self.blueteam_formation) do
+                    Log(k .. " = " .. val)
+            end
+        end
+    end
+
+    -- OLD STYLE
+    -- if(bGameStart) then
+    --     local data = CryAction.LoadXML(self.xml_def_path,self.xml_data_path)
+    --     data.version = data.version + 1
+    --     CryAction.SaveXML(self.xml_def_path, self.xml_data_path, data)
+    --     self.time_elapsed = 0.0;
+    --     Log("Spawner:OnReset")
     --     GameToken.SetToken("GameStates.GameIsRunning",true)
     --     Log("GameRunning = " .. type(GameToken.GetToken("GameStates.GameIsRunning")))
 
@@ -145,65 +208,12 @@ function Spawner:OnReset(bGameStart)
     --     GameToken.SetToken("GameStates.RedNumAlive",self.Properties.iNumberOfPlayers)
     --     Log("Red team has " .. GameToken.GetToken("GameStates.RedNumAlive"))
 
-    --     -- Red team
-    --     for i=1,self.Properties.iNumberOfPlayers do
-    --         local playerPos = Spawner:GenerateLocation(501,521,523,563)
-    --         self.redteam_formation[#self.redteam_formation+1] = {x=playerPos.x,y=playerPos.y,theta=playerPos.theta}
-    --         Spawner:SpawnPlayer("grunts.Human-red", "humans.grunts.Human-red", playerPos,i)
-    --     end
+    --     playerpos = Spawner:GenerateLocation(self.xmin,self.xmax,self.ymin,self.ymax)
+    --     Log("x=" .. playerpos.x .. " y=" .. playerpos.y .. " theta=" .. playerpos.theta)
 
-    --     for _,player in pairs(self.redteam_formation) do
-    --         for k,val in pairs(player) do
-    --             Log(k .. " = " .. val)
-    --         end
-    --     end
-
-    --     -- Spawner:SpawnFormationFromXML("grunts.Human-blue","humans.grunts.Human-blue")
-    --     local data = CryAction.LoadXML(self.xml_formation_def_path, self.xml_formation_data_path)
-    --     for i,playerPos in pairs(data.formation) do
-    --         Log("#" .. i .. " x,y,theta " .. playerPos.x .. "," .. playerPos.y .. "," .. playerPos.theta)
-    --         self.blueteam_formation[#self.blueteam_formation+1] = {x=playerPos.x,y=playerPos.y,theta=playerPos.theta}
-    --         Spawner:SpawnPlayer("grunts.Human-blue","humans.grunts.Human-blue", playerPos,i)
-    --     end
-
-    --     Log("Number of entries in blueteam_formation is = " .. #self.blueteam_formation)
-    --     for _,player in pairs(self.blueteam_formation) do
-    --         for k,val in pairs(player) do
-    --             Log(k .. " = " .. val)
-    --         end
-    --     end
-
-    --     GameToken.SetToken("GameStates.BlueNumAlive",#self.redteam_formation)
-    --     Log("Blue team has " .. GameToken.GetToken("GameStates.BlueNumAlive"))
-    --     GameToken.SetToken("GameStates.RedNumAlive",#self.blueteam_formation)
-    --     Log("Red team has " .. GameToken.GetToken("GameStates.RedNumAlive"))
+    --     Spawner:SpawnFormation("grunts.Human-red","humans.grunts.Human-red",501,521,523,563)
+    --     Spawner:SpawnFormation("grunts.Human-blue","humans.grunts.Human-blue",478,500,523,563)
     -- end
-
-    -- OLD STYLE
-    if(bGameStart) then
-        local data = CryAction.LoadXML(self.xml_def_path,self.xml_data_path)
-        data.version = data.version + 1
-        CryAction.SaveXML(self.xml_def_path, self.xml_data_path, data)
-        self.time_elapsed = 0.0;
-        Log("Spawner:OnReset")
-        GameToken.SetToken("GameStates.GameIsRunning",true)
-        Log("GameRunning = " .. type(GameToken.GetToken("GameStates.GameIsRunning")))
-
-        if GameToken.GetToken("GameStates.GameIsRunning") == "1" then
-            Log("Game has started!")
-        end
-
-        GameToken.SetToken("GameStates.BlueNumAlive",self.Properties.iNumberOfPlayers)
-        Log("Blue team has " .. GameToken.GetToken("GameStates.BlueNumAlive"))
-        GameToken.SetToken("GameStates.RedNumAlive",self.Properties.iNumberOfPlayers)
-        Log("Red team has " .. GameToken.GetToken("GameStates.RedNumAlive"))
-
-        playerpos = Spawner:GenerateLocation(self.xmin,self.xmax,self.ymin,self.ymax)
-        Log("x=" .. playerpos.x .. " y=" .. playerpos.y .. " theta=" .. playerpos.theta)
-
-        Spawner:SpawnFormation("grunts.Human-red","humans.grunts.Human-red",501,521,523,563)
-        Spawner:SpawnFormation("grunts.Human-blue","humans.grunts.Human-blue",478,500,523,563)
-    end
 end
 
 -- THIS WORKS
@@ -213,7 +223,6 @@ function Spawner:SpawnFormation(entityName,entityArchetype,xmin,xmax,ymin,ymax)
     local len = #data.formation+1
     if(entityName=="grunts.Human-blue") then
         data.formation[len] = {}
-        data.formation[len]["win"] = 0
         data.formation[len]["blue_score"] = -1
         data.formation[len]["red_score"] = -1
     end
