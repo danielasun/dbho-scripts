@@ -1,0 +1,8 @@
+<Definition root="Data">
+    <Property name="version" type="string"/>
+    <Array name="formation" elementName="pos">
+        <Property name="x" type="float"/>
+        <Property name="y" type="float"/>
+        <Property name="theta" type="float" />
+    </Array>
+</Definition>

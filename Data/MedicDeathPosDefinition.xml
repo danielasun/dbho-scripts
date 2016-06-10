@@ -1,0 +1,11 @@
+<Definition root="Data">
+    <Property name="version" type="string"/>
+    <Table name="t">
+        <Property name="tablelen" type="int" />
+        <Property name="maxsize"  type="int" />
+        <Array name="pos" elementName="coord">
+           <Property name="x" type="float"/>
+           <Property name="y" type="float"/>
+        </Array>
+    </Table>
+</Definition>

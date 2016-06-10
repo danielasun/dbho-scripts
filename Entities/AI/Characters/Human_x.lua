@@ -59,20 +59,15 @@ Human_x =
 
 		proceduralLeaningFactor = 0.0, -- disable procedural leaning by default for all humans (infected don't need it, and the others use turn assets)
 
-		canUseComplexLookIK = true,
-		lookAtSimpleHeadBone = "Bip01 Head",
-
-		cornerSmoother = 2, -- 1 = C2 method; 2 = C3 method
-
 		stepThresholdTime = 0.5, -- Duration (seconds) the current position deviation needs to be above stepThresholdDistance before the character steps
 		stepThresholdDistance = 0.1, -- Distance (meters) that the character has to deviate from the entity before the step timer (stepThresholdTime) steps
 
 		turnThresholdTime = 0.5, -- Duration (seconds) the current angle deviation needs to be above turnThresholdAngle before the character turns
 		turnThresholdAngle = 5,  -- Angle (degrees) that the character has to deviate from the entity before the turn timer (turnThresholdTime) turns
 
-    -- hunger instance variables
-    bHungry = false,
-    hunger = 100,  -- how full the human is
+	    -- hunger instance variables
+	    bHungry = false,
+	    hunger = 100,  -- how full the human is
     
 		maxDeltaAngleRateNormal = 360, -- Maximum turnspeed (degrees/second)
 
@@ -775,40 +770,39 @@ mergef(Human_x, AIBase, 1)
 
 -----------------------------------------------------------------------------------------------------
 -- DBHO added here
-function Human_x:OnEnemySeen()
-	Log("============")
-    Log("OnEnemySeen")
-    Log("============")
-    -- AI.Signal(SIGNALFILTER_SENDER,1,"OnInjuredPlayerSeen",self.id) -- doesn't work
-end
+-- function Human_x:OnEnemySeen()
+-- 	Log("============")
+--     Log("OnEnemySeen")
+--     Log("============")
+--     -- AI.Signal(SIGNALFILTER_SENDER,1,"OnInjuredPlayerSeen",self.id) -- doesn't work
+-- end
 
-function Human_x:OnDamage(sender, data)
-	Log("============")
-    Log("OnDamage!")
-    Log("============")
-    Log(300)
-    Log(self.Properties.Damage.health) -- doesn't work
-end
+-- function Human_x:OnEnemyDamage(sender, data)
+-- 	Log("============")
+--     Log("OnDamage!")
+--     Log("============")
+--     Log(300)
+--     Log(self.Properties.Damage.health) -- doesn't work
+-- end
 
-function Human_x:OnCloseContact()
-	Log("============")
-    Log("OnCloseContact!")
-    Log("============")
-    Log(self.Properties.Damage.health)
+-- function Human_x:OnCloseContact()
+-- 	Log("============")
+--     Log("OnCloseContact!")
+--     Log("============")
+--     Log(self.Properties.Damage.health)
+-- end
 
-end
+-- function Human_x:OnInjuredPlayerSeen()
+-- 	Log("==========")
+-- 	Log("Custom Signal!!!")
+-- 	Log("==========")
+-- end
 
-function Human_x:OnInjuredPlayerSeen()
-	Log("==========")
-	Log("Custom Signal!!!")
-	Log("==========")
-end
-
-function Human_x:OnNoTarget()
-	Log("==========")
-	Log("Zombie wander, dude")
-	Log("==========")
-end
+-- function Human_x:OnNoTarget()
+-- 	Log("==========")
+-- 	Log("Zombie wander, dude")
+-- 	Log("==========")
+-- end
 
 -- ZombieWander = function(self,entity)
 -- 	Log("Zombie wander, dude")
@@ -818,6 +812,9 @@ function Human_x:ZombieWander()
 	Log("function ZombieWander")
 
 	local pos = self:GetPos();
+	Log("printing position")
+	Log(pos.x)
+	Log(pos.y)
 	pos.x = pos.x + random(-10, 10)
 	pos.y = pos.y + random(-10, 10)
 
@@ -831,10 +828,6 @@ function Human_x:ZombieWander()
 	AIBehavior.DEFAULT:ACT_GOTO(self, self, data);
 
   -- AI.Signal(SIGNALFILTER_SENDER,1,"OnInjuredPlayerSeen",self.id)
-end
-
-function Human_x:PrintMessage(message)
-	Log(message)
 end
 
 function Human_x:SaveTable()
@@ -854,9 +847,54 @@ function Human_x:SaveTable()
 	data.test.tablelen = len+1
 	data.test.d[data.test.tablelen] = {da=1000, db={x=1,y=2,z=3}}
 	CryAction.SaveXML("C:\\Amazon\\Lumberyard\\1.1.0.0\\dev\\GameSDK\\Scripts\\ZombieData\\ZombieXMLDefinition.xml", "C:\\Amazon\\Lumberyard\\1.1.0.0\\dev\\GameSDK\\Scripts\\ZombieData\\ZombieXMLData.xml",data);
-
-
 end
+
+-- function BasicAI.OnDeath( entity )
+--     Log("Human_x.OnDeath()")
+-- 	Log(tostring(Entity.GetArchetype(entity)) .. " died!" )
+
+--     AI.SetSmartObjectState( entity.id, "Dead" );
+
+
+--     -- notify spawner - so it counts down and updates
+--     if(entity.AI.spawnerListenerId) then
+--         local spawnerEnt = System.GetEntity(entity.AI.spawnerListenerId);
+--         if(spawnerEnt) then
+--             spawnerEnt:UnitDown();
+--         end
+--     end
+
+--     if(entity.AI.theVehicle and entity.AI.theVehicle:IsDriver(entity.id)) then
+--             -- disable vehicle's AI
+--         if (entity.AI.theVehicle.AIDriver) then
+--           entity.AI.theVehicle:AIDriver(0);
+--         end
+--         entity.AI.theVehicle=nil;
+--     end
+
+--     GameAI.UnregisterWithAllModules(entity.id);
+--     AI.UnregisterTargetTrack(entity.id);
+
+--     if(entity.Event_Dead) then
+--         entity:Event_Dead(entity);
+--     end
+
+--     -- free mounted weapon
+--     if (entity.AI.current_mounted_weapon) then
+--         if (entity.AI.current_mounted_weapon.item:GetOwnerId() == entity.id) then
+--             entity.AI.current_mounted_weapon.item:Use( entity.id );--Stop using
+--             entity.AI.current_mounted_weapon.reserved = nil;
+--             AI.ModifySmartObjectStates(entity.AI.current_mounted_weapon.id,"Idle,-Busy");
+--         end
+--         entity.AI.current_mounted_weapon.listPotentialUsers = nil;
+--         entity.AI.current_mounted_weapon = nil;
+--         AI.ModifySmartObjectStates(entity.id,"-Busy");
+--     end
+--     -- check ammo count modifier
+--     if(entity.AI.AmmoCountModifier and entity.AI.AmmoCountModifier>0) then
+--         entity:ModifyAmmo();
+--     end
+-- end
 
 -------------------------
 
@@ -1198,7 +1236,7 @@ function Human_x:UseMountedWeapon()
 				end
 			end
 		else
-			--TODO(m·rcio): Fail Behavior
+			--TODO(m√°rcio): Fail Behavior
 			self:DrawWeaponNow();
 		end
 	end

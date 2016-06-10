@@ -662,8 +662,16 @@ end
 
 
 function BasicAI.OnDeath( entity )
+	Log("BasicAI.OnDeath()")
+	Log("Entity Archetype is " .. entity:GetArchetype())
 
-	Log("IDEED")
+	if(entity:GetArchetype() == "humans.grunts.Human-blue") then
+		Log("A player on the Blue team died!")
+		GameToken.SetToken("GameStates.BlueNumAlive", GameToken.GetToken("GameStates.BlueNumAlive") - 1)
+	elseif (entity:GetArchetype() == "humans.grunts.Human-red") then
+		Log("A player on the Red team died!")
+		GameToken.SetToken("GameStates.RedNumAlive", GameToken.GetToken("GameStates.RedNumAlive") - 1)
+	end
 
 	AI.SetSmartObjectState( entity.id, "Dead" );
 

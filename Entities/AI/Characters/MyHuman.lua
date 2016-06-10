@@ -22,7 +22,58 @@ MyHuman_x = {
   }
 }
 
+
+
 mergef(MyHuman_x, Human_x, 1)
+
+function MyHuman_x:Callback()
+    Log("callback")
+end
+
+-- function BasicAI.OnDeath( entity )
+--     Log("MyHuman_x.OnDeath()")
+--     AI.SetSmartObjectState( entity.id, "Dead" );
+
+--     -- notify spawner - so it counts down and updates
+--     if(entity.AI.spawnerListenerId) then
+--         local spawnerEnt = System.GetEntity(entity.AI.spawnerListenerId);
+--         if(spawnerEnt) then
+--             spawnerEnt:UnitDown();
+--         end
+--     end
+
+--     if(entity.AI.theVehicle and entity.AI.theVehicle:IsDriver(entity.id)) then
+--             -- disable vehicle's AI
+--         if (entity.AI.theVehicle.AIDriver) then
+--           entity.AI.theVehicle:AIDriver(0);
+--         end
+--         entity.AI.theVehicle=nil;
+--     end
+
+--     GameAI.UnregisterWithAllModules(entity.id);
+--     AI.UnregisterTargetTrack(entity.id);
+
+--     if(entity.Event_Dead) then
+--         entity:Event_Dead(entity);
+--     end
+
+--     -- free mounted weapon
+--     if (entity.AI.current_mounted_weapon) then
+--         if (entity.AI.current_mounted_weapon.item:GetOwnerId() == entity.id) then
+--             entity.AI.current_mounted_weapon.item:Use( entity.id );--Stop using
+--             entity.AI.current_mounted_weapon.reserved = nil;
+--             AI.ModifySmartObjectStates(entity.AI.current_mounted_weapon.id,"Idle,-Busy");
+--         end
+--         entity.AI.current_mounted_weapon.listPotentialUsers = nil;
+--         entity.AI.current_mounted_weapon = nil;
+--         AI.ModifySmartObjectStates(entity.id,"-Busy");
+--     end
+--     -- check ammo count modifier
+--     if(entity.AI.AmmoCountModifier and entity.AI.AmmoCountModifier>0) then
+--         entity:ModifyAmmo();
+--     end
+-- end
+
 
 CreateActor(MyHuman_x)
 MyHuman=CreateAI(MyHuman_x)

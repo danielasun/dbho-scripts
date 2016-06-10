@@ -1,0 +1,17 @@
+<Definition root="Data">
+
+  <Table name="tallies">
+    <Property name="jumps" type="int" />
+  </Table>
+
+  <Array name="event_list" elementName="Event">
+    <Property name="t" type="float" />
+    <Property name="event" type="string" />
+  </Array>
+  
+  <Array name="player_pos" elementName="Pos">
+    <Property name="t" type="float" />
+    <Property name="pos" type="Vec3" />
+  </Array>
+
+</Definition>
