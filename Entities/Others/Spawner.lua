@@ -31,10 +31,151 @@ Spawner =
     fallHeight = 32,
 }
 
-function fitness(time,numberOfPlayersOnOwnTeamAlive, numberOfPlayersOnOtherTeamKilled)
-    return numberOfPlayersOnOwnTeamAlive + numberOfPlayersOnOtherTeamKilled - time
+---------------------------------------------------------------------------------
+-- File    : genetic_algorithm.lua
+-- By      : Alexandre Trilla <alex@atrilla.net>
+--
+-- AIMA - Artificial Intelligence, A Maker's Approach
+--
+-- https://github.com/atrilla/aima
+--
+-- Modified by: Benson Ku for CS 188
+---------------------------------------------------------
+
+-- Genetic algorithm.
+--
+-- PRE:
+-- population - set of individuals (table).
+-- fitness - evaluate individual (function).
+--
+-- POST:
+-- solution - solution state (table).
+--
+-- Each individual (state) is a binary array.
+-- Population is ordered from best to worst according to fitness. It
+-- must be greater than one.
+-- Fitness is normalised from 0 (bad) to 1 (good).
+
+-- Population is data.formation (array of scenarios)
+
+
+function fitness(scenario)
+    -- x is the scenario/formation
+    return scenario["fitness"]
 end
 
+function sort_population(population)
+    
+    local function comp(x, y) -- 
+        return (fitness(x) < fitness(y))
+    end
+
+    return table.sort(population, comp)
+end
+
+function random_selection(population)
+    -- randomly selects two formations based on fitness
+
+    local fit = {}
+    local sumfit = 0
+    
+    -- sum all fitnesses
+    for i = 1, #population do
+        local fitIndi = fitness(population[i])
+        table.insert(fit, fitIndi)
+        sumfit = sumfit + fitIndi
+    end
+
+    --normalize fitness??
+    fit[1] = fit[1] / sumfit
+    for i = 2, #fit do
+        fit[i] = fit[i] / sumfit + fit[i-1]
+    end
+
+    local x, y
+    local rx = math.random()
+    local ry = math.random()
+    for i = 1, #fit do
+        if (rx < fit[i]) then
+            x = population[i]
+            break
+        end
+    end
+    for i = 1, #fit do
+        if (ry < fit[i]) then
+            y = population[i]
+            break
+        end
+    end
+    return x, y
+end
+
+function Spawner:Reproduce(mom, dad)
+    Log("$9Spawner:Reproduce()")
+    local child = {}
+    for i = 1, self.Properties.iNumberOfPlayers do
+        if (math.random() < 0.5) then -- half of the time, take mom's position
+            child["x"..i] = mom["x"..i]
+            child["y"..i] = mom["y"..i]
+            child["theta"..i] = mom["theta"..i]
+        else -- the other half, take dad's position
+            child["x"..i] = dad["x"..i]
+            child["y"..i] = dad["y"..i]
+            child["theta"..i] = dad["theta"..i]
+        end
+    end
+    for k,val in pairs(child) do
+            Log("$9" .. k .. " = " .. val)
+    end
+    return child
+end
+
+function Spawner:Mutate(child)
+  -- update positions of guys in formation by randomly adding x y position
+  -- max and min pos hardcoded
+    radius = 20
+    for i = 1, self.Properties.iNumberOfPlayers do
+
+        child["x"..i] = child["x"..i] + math.random(-1, 1) * radius
+        if child["x"..i] > 500 then
+            child["x"..i] = 500
+        elseif child["x"..i] < 478 then
+            child["x"..i] = 478
+        end
+
+        child["y"..i] = child["y"..i] + math.random(-1, 1) * radius
+        if child["y"..i] > 563 then
+            child["y"..i] = 563
+        elseif child["y"..i] < 523 then
+            child["y"..i] = 523
+        end
+
+        child["theta"..i] = math.mod(child["theta"..i] + math.random()*2*math.pi , 2*math.pi) 
+    end
+end
+
+
+
+------------------------------------------------------------------------
+-- Spawner Stuff
+
+--runs for one generation, be sure to update fitness after running this
+function Spawner:GeneticAlgorithm(population)
+    Log("$9Spawner:GeneticAlgorithm()")
+    sort_population(population)
+    local new_population = {}
+    for i = 1, #population do
+        local mom, dad = random_selection(population)
+        local child = Spawner:Reproduce(mom, dad)
+        if (math.random() < 0.05) then
+            Spawner:Mutate(child)
+        end
+        table.insert(new_population, child)
+    end
+    population = new_population
+    Log("$9New Population made")
+    return population
+end
 
 function Spawner:GenerateLocation(xmin,xmax,ymin,ymax)
     math.randomseed(os.clock()*1000)
@@ -118,14 +259,16 @@ function Spawner:OnReset(bGameStart)
         -- every generation
         if(data.scenario >= self.generation_size) then
             data.generation = data.generation + 1
+
+            -- starting new Generation from Genetic Algorithm
             if data.generation <= self.number_of_generations then
                 data.scenario = 0 -- never ever finish with scenario = 0
+                data.formation = Spawner:GeneticAlgorithm(data.formation)
                 for i = 1, self.generation_size do
                     data.formation[i]["blue_score"] = -1;
                     data.formation[i]["red_score"] = -1;
-                    data.formation[data.scenario]["fitness"] = -1
+                    data.formation[i]["fitness"] = -1
                 end
-                Log("GeneticAlgorithm()")
             else
                 LEARNINGOVER = 1
                 Log("$5 MACHINE LEARNING OVER")
@@ -143,7 +286,6 @@ function Spawner:OnReset(bGameStart)
 
             -- set the GameTokens
             GameToken.SetToken("GameStates.GameIsRunning",true)
-            Log("GameRunning = " .. type(GameToken.GetToken("GameStates.GameIsRunning")))
 
             if GameToken.GetToken("GameStates.GameIsRunning") == "1" then
                 Log("Game has started!")
@@ -217,44 +359,44 @@ function Spawner:OnReset(bGameStart)
 end
 
 -- THIS WORKS
-function Spawner:SpawnFormation(entityName,entityArchetype,xmin,xmax,ymin,ymax)
-    Log("Spawner:SpawnFormation")
-    local data = CryAction.LoadXML(self.xml_def_path,self.xml_data_path)
-    local len = #data.formation+1
-    if(entityName=="grunts.Human-blue") then
-        data.formation[len] = {}
-        data.formation[len]["blue_score"] = -1
-        data.formation[len]["red_score"] = -1
-    end
+-- function Spawner:SpawnFormation(entityName,entityArchetype,xmin,xmax,ymin,ymax)
+--     Log("Spawner:SpawnFormation")
+--     local data = CryAction.LoadXML(self.xml_def_path,self.xml_data_path)
+--     local len = #data.formation+1
+--     if(entityName=="grunts.Human-blue") then
+--         data.formation[len] = {}
+--         data.formation[len]["blue_score"] = -1
+--         data.formation[len]["red_score"] = -1
+--     end
 
-    for i=1,self.Properties.iNumberOfPlayers do
-        --Log("i = " .. i .. " os.time() = " .. os.clock()*1000)
-        math.randomseed(os.clock()*1000)
-        math.random(); math.random();
-        local tempx = math.random(xmin,xmax)
-        local tempy = math.random(ymin,ymax)
-        local temptheta = math.rad(math.random(0,360))
+--     for i=1,self.Properties.iNumberOfPlayers do
+--         --Log("i = " .. i .. " os.time() = " .. os.clock()*1000)
+--         math.randomseed(os.clock()*1000)
+--         math.random(); math.random();
+--         local tempx = math.random(xmin,xmax)
+--         local tempy = math.random(ymin,ymax)
+--         local temptheta = math.rad(math.random(0,360))
 
-        local params = {id,
-                        class="Human",
-                        name= entityName..i,
-                        position={x=tempx,y=tempy,z=self.fallHeight}, 
-                        orientation={math.cos(temptheta),math.sin(temptheta),0},
-                        scale={1,1,1},
-                        flags=0,
-                        archetype= entityArchetype,
-                       }
+--         local params = {id,
+--                         class="Human",
+--                         name= entityName..i,
+--                         position={x=tempx,y=tempy,z=self.fallHeight}, 
+--                         orientation={math.cos(temptheta),math.sin(temptheta),0},
+--                         scale={1,1,1},
+--                         flags=0,
+--                         archetype= entityArchetype,
+--                        }
 
-        System.SpawnEntity(params)
-        Log("x,y,theta = ".. tempx ..",".. tempy .."," ..  temptheta)
+--         System.SpawnEntity(params)
+--         Log("x,y,theta = ".. tempx ..",".. tempy .."," ..  temptheta)
 
-        if(entityName=="grunts.Human-blue") then
-            data.formation[len]["x"..i] = tempx
-            data.formation[len]["y"..i] = tempy
-            data.formation[len]["theta"..i] = temptheta
-            Log("length of the table is " .. #data.formation)
-            CryAction.SaveXML(self.xml_def_path, self.xml_data_path, data)
-            Log("Saving position data for human "..i)
-        end
-    end
-end
+--         if(entityName=="grunts.Human-blue") then
+--             data.formation[len]["x"..i] = tempx
+--             data.formation[len]["y"..i] = tempy
+--             data.formation[len]["theta"..i] = temptheta
+--             Log("length of the table is " .. #data.formation)
+--             CryAction.SaveXML(self.xml_def_path, self.xml_data_path, data)
+--             Log("Saving position data for human "..i)
+--         end
+--     end
+-- end
